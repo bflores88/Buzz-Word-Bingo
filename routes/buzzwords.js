@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const buzzword = require('../app.js');
-const bodyParser = require('body-parser');
 
 let buzzwordObj = { buzzwords: [] };
 
@@ -45,10 +43,26 @@ function updateBuzzWordPoints(buzzword, points) {
   return;
 }
 
+function deleteBuzzWord (buzzword) {
+  let buzzWordArray = buzzwordObj.buzzwords;
+  let deleteIndex = 0;
+
+  buzzWordArray.forEach((objectPair, index) => {
+    if (objectPair.buzzWord === buzzword) {
+      deleteIndex = index;
+    }
+    return;
+  });
+
+  buzzWordArray.splice(deleteIndex, 1);
+  return;
+}
+
 router
   .route('/')
   .get((req, res) => {
     res.send(JSON.stringify(buzzwordObj));
+    return;
   })
   .post((req, res) => {
     if (!checkKeys(req.body)) {
@@ -65,6 +79,7 @@ router
     createBuzzword(req.body.buzzWord, req.body.points);
 
     res.send('{ "success": true }');
+    return;
   })
   .put((req, res) => {
     if (!checkKeys(req.body)) {
@@ -81,6 +96,18 @@ router
     updateBuzzWordPoints(req.body.buzzWord, req.body.points);
 
     res.send('{ "success": true }');
-  });
+    return;
+  })
+  .delete((req, res) => {
+    if (!checkKeys(req.body)) {
+      res.send(`{ "success": false }`);
+      return;
+    }
+
+    deleteBuzzWord (req.body.buzzWord);
+
+    res.send('{ "success": true }');
+    return;
+  })
 
 module.exports = router;
