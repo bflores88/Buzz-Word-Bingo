@@ -3,16 +3,16 @@ const router = express.Router();
 const buzzword = require('../app.js');
 const bodyParser = require('body-parser');
 
-let buzzwordObj = {'buzzwords': []};
+let buzzwordObj = { buzzwords: [] };
 
-function checkKeys (bodyObject) {
-  if(bodyObject.hasOwnProperty('buzzWord') && bodyObject.hasOwnProperty('points')){
+function checkKeys(bodyObject) {
+  if (bodyObject.hasOwnProperty('buzzWord') && bodyObject.hasOwnProperty('points')) {
     return true;
   }
   return false;
 }
 
-function createBuzzword (buzzword, points){
+function createBuzzword(buzzword, points) {
   let newBuzzword = {};
   newBuzzword.buzzWord = buzzword;
   newBuzzword.points = points;
@@ -23,37 +23,64 @@ function createBuzzword (buzzword, points){
   return;
 }
 
-function checkBuzzwordExists (buzzword) {
+function checkBuzzwordExists(buzzword) {
   let buzzWordArray = buzzwordObj.buzzwords;
 
-  function hasBuzzword (element) {
-    
+  function hasBuzzword(object) {
+    return object.buzzWord === buzzword;
   }
 
+  return buzzWordArray.some(hasBuzzword);
 }
 
-router.route('/')
+function updateBuzzWordPoints(buzzword, points) {
+  let buzzWordArray = buzzwordObj.buzzwords;
+
+  buzzWordArray.forEach((objectPair) => {
+    if (objectPair.buzzWord === buzzword) {
+      objectPair.points = points;
+    }
+    return;
+  });
+  return;
+}
+
+router
+  .route('/')
   .get((req, res) => {
     res.send(JSON.stringify(buzzwordObj));
   })
   .post((req, res) => {
-    if(!checkKeys(req.body)){
-      res.send(`{ "success": false }`)
+    if (!checkKeys(req.body)) {
+      res.send(`{ "success": false }`);
       return;
-    };
+    }
+
+    if (checkBuzzwordExists(req.body.buzzWord)) {
+      console.log('BuzzWord already exists!');
+      res.send(`{ "success": false }`);
+      return;
+    }
 
     createBuzzword(req.body.buzzWord, req.body.points);
-    
-    res.send('{ "success": true }')
+
+    res.send('{ "success": true }');
   })
   .put((req, res) => {
-    if(!checkKeys(req.body)){
-      res.send(`{ "success": false }`)
+    if (!checkKeys(req.body)) {
+      res.send(`{ "success": false }`);
       return;
-    };
+    }
 
+    if (!checkBuzzwordExists(req.body.buzzWord)) {
+      console.log('BuzzWord to update does not exist!');
+      res.send(`{ "success": false }`);
+      return;
+    }
 
+    updateBuzzWordPoints(req.body.buzzWord, req.body.points);
 
-  })
+    res.send('{ "success": true }');
+  });
 
 module.exports = router;
