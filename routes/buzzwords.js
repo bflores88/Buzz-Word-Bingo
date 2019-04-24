@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const routerReset = express.Router();
+const routerHeard = express.Router();
 
 let buzzwordObj = { buzzwords: [] };
+let scoreBoard = { totalScore: 0 };
 
 function checkKeys(bodyObject) {
   if (bodyObject.hasOwnProperty('buzzWord') && bodyObject.hasOwnProperty('points')) {
@@ -43,7 +46,7 @@ function updateBuzzWordPoints(buzzword, points) {
   return;
 }
 
-function deleteBuzzWord (buzzword) {
+function deleteBuzzWord(buzzword) {
   let buzzWordArray = buzzwordObj.buzzwords;
   let deleteIndex = 0;
 
@@ -55,6 +58,27 @@ function deleteBuzzWord (buzzword) {
   });
 
   buzzWordArray.splice(deleteIndex, 1);
+  return;
+}
+
+function resetServer() {
+  buzzwordObj = { buzzwords: [] };
+  scoreBoard = { totalScore: 0 };
+  return;
+}
+
+function updateScore(buzzword) {
+  let buzzWordArray = buzzwordObj.buzzwords;
+  let score = 0;
+
+  buzzWordArray.forEach((objectPair, index) => {
+    if (objectPair.buzzWord === buzzword) {
+      score = objectPair.points;
+    }
+    return;
+  });
+
+  scoreBoard.totalScore = Number(scoreBoard.totalScore) + Number(score);
   return;
 }
 
@@ -104,10 +128,34 @@ router
       return;
     }
 
-    deleteBuzzWord (req.body.buzzWord);
+    deleteBuzzWord(req.body.buzzWord);
 
     res.send('{ "success": true }');
     return;
-  })
+  });
 
-module.exports = router;
+routerReset.route('/').post((req, res) => {
+  resetServer();
+
+  res.send('{ "success": true }');
+  return;
+});
+
+routerHeard.route('/').post((req, res) => {
+  if (!checkBuzzwordExists(req.body.buzzWord)) {
+    console.log('BuzzWord to update does not exist!');
+    res.send(`{ "success": false }`);
+    return;
+  }
+
+  updateScore(req.body.buzzWord);
+
+  res.send(JSON.stringify(scoreBoard));
+  return;
+});
+
+module.exports = {
+  router: router,
+  routerReset: routerReset,
+  routerHeard: routerHeard,
+};
