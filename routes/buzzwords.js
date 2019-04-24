@@ -10,7 +10,17 @@ function checkKeys(bodyObject) {
   if (bodyObject.hasOwnProperty('buzzWord') && bodyObject.hasOwnProperty('points')) {
     return true;
   }
+
   return false;
+}
+
+function checkBodyObjLength() {
+  let buzzWordArray = buzzwordObj.buzzwords;
+
+  if (buzzWordArray.length === 5) {
+    return false;
+  }
+  return;
 }
 
 function createBuzzword(buzzword, points) {
@@ -96,6 +106,11 @@ router
 
     if (checkBuzzwordExists(req.body.buzzWord)) {
       console.log('BuzzWord already exists!');
+      res.send(`{ "success": false }`);
+      return;
+    }
+
+    if (checkBodyObjLength === false) {
       res.send(`{ "success": false }`);
       return;
     }
