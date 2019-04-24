@@ -110,7 +110,7 @@ router
       return;
     }
 
-    if (checkBodyObjLength === false) {
+    if (!checkBodyObjLength()) {
       res.send(`{ "success": false }`);
       return;
     }
